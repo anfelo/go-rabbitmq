@@ -1,9 +1,35 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/anfelo/go-rabbitmq/internal/rabbitmq"
+)
+
+type App struct {
+	Rmq *rabbitmq.RabbitMQ
+}
 
 func Run() error {
 	fmt.Println("Go RabbitMQ")
+	rmq := rabbitmq.NewRabbitMQServer()
+	app := App{
+		Rmq: rmq,
+	}
+
+	err := app.Rmq.Connect()
+	if err != nil {
+		return err
+	}
+	defer app.Rmq.Conn.Close()
+
+	err = app.Rmq.Publish("Hi")
+	if err != nil {
+		return err
+	}
+
+	app.Rmq.Consume()
+
 	return nil
 }
 
